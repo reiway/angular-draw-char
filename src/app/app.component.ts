@@ -1,5 +1,8 @@
 import { AfterViewInit, Component, ElementRef, OnInit, Renderer2, ViewChild } from '@angular/core';
 import { timer } from 'rxjs';
+import WordCloud from 'wordcloud';
+
+
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
@@ -7,121 +10,42 @@ import { timer } from 'rxjs';
 })
 export class AppComponent implements OnInit, AfterViewInit {
   @ViewChild('main') main!: ElementRef
-  data: any = {
-    w: [
-      {
-        name: 'part-1',
-        space: ['space-1', 'space-2'],
-        text: [
 
-        ]
-      },
-      {
-        name: 'part-2',
-        space: ['space-1', 'space-2'],
-        text: [
-
-        ]
-      },
-      {
-        name: 'part-3',
-        space: ['space-1', 'space-2'],
-        text: [
-
-        ]
-      },
-      {
-        name: 'part-4',
-        space: ['space-1', 'space-2'],
-        text: [
-        ]
-      },
-    ],
-    h: [
-      {
-        name: 'part-1',
-        space: [],
-        text: [
-
-        ]
-      },
-      {
-        name: 'part-2',
-        space: [],
-        text: [
-
-        ]
-      },
-      {
-        name: 'part-3',
-        space: [],
-        text: [
-
-        ]
-      },
-    ],
-    y: [
-      {
-        name: 'part-1',
-        space: ['space-1', 'space-2'],
-        text: [
-
-        ]
-      },
-      {
-        name: 'part-2',
-        space: ['space-1', 'space-2'],
-        text: [
-
-        ]
-      }
-    ],
-    space: [],
-    n: [
-      {
-        name: 'part-1',
-        space: [],
-        text: [
-
-        ]
-      },
-      {
-        name: 'part-2',
-        space: ['space-1', 'space-2'],
-        text: [
-
-        ]
-      },
-      {
-        name: 'part-3',
-        space: [],
-        text: [
-
-        ]
-      }
-    ],
-    o: [
-      {
-        name: 'part-1',
-        space: ['space-1', 'space-2'],
-        text: [
-
-        ]
-      }
-    ],
-    t: [
-      {
-        name: 'part-1',
-        space: ['space-1', 'space-2'],
-        text: [
-
-        ]
-      }
-    ],
-    qm: []
-  }
   arrComment: Array<string> = [];
-
+  layout: any;
+  arr: any = [
+    {
+      id: 'w',
+      data: [],
+      img: null
+    }, {
+      id: 'h',
+      data: [],
+      img: null
+    }, {
+      id: 'y',
+      data: [],
+      img: null
+    }, {
+      id: 'n',
+      data: [],
+      img: null
+    }, {
+      id: 'o',
+      data: [],
+      img: null
+    }, {
+      id: 't',
+      data: [],
+      img: null
+    }, {
+      id: 'qm',
+      data: [],
+      img: null
+    },
+  ]
+  cacheComment: any = [];
+  count = 0;
   constructor(
     private renderer: Renderer2
   ) { }
@@ -131,64 +55,48 @@ export class AppComponent implements OnInit, AfterViewInit {
   }
 
   ngAfterViewInit(): void {
-    Object.keys(this.data).forEach((ele: string) => {
-      this.generateHTML(ele, this.data[ele]);
-    });
-
-    let length = 0;
-    timer(100, 100).subscribe(() => {
-      this.arrComment.push(this.generateRandomText() + " ");
-
-    })
-    const a = timer(1000, 1000).subscribe(() => {
-      length += this.arrComment.length;
-      this.pushTextToChar();
-      if (length > 700) {
-        a.unsubscribe();
-      }
-      console.log(length);
-
-    })
-
-
-
-  }
-
-  convertFontSize(arr: Array<HTMLElement>, ignore: any) {
-    arr.forEach((ele: any) => {
-      (ele.element as HTMLElement).childNodes.forEach((node: any) => {
-        if (node !== ignore) {
-          const fontSize = +node.style.fontSize.split('px')[0] - 1;
-          if (fontSize) {
-            node.style.fontSize = fontSize + 'px';
-          }
-        }
-      })
-    })
-  }
-
-  pushTextToChar() {
-    const arr = ['w', 'h', 'y', 'n', 'o', 't'];
-    this.arrComment.forEach((comment: string) => {
-      const charSelect = this.data[arr[Math.floor(Math.random() * Object.keys(arr).length)]]
-      const text = this.renderer.createText(comment);
-      const p = this.renderer.createElement('p');
-      this.renderer.appendChild(p, text);
-      const random = Math.floor(Math.random() * charSelect.length);
-      this.renderer.appendChild(charSelect[random].element, p);
-      if (charSelect[random].element.scrollHeight > (this.main.nativeElement as HTMLDivElement).offsetHeight * 1.5) {
-        const fontSize = +charSelect[random].element.style.fontSize.split('px')[0];
-        if (fontSize) {
-          charSelect[random].element.style.fontSize = fontSize - 1 + 'px';
-        }
+    this.arr = this.arr.map((ele: any) => {
+      return {
+        ...ele,
+        data: []
       }
     });
-    this.arrComment = [];
+    this.arr.forEach((ele: any) => {
+      var img = new Image();
+      img.src = this.getUrlImg(ele.id);
+      ele.img = img;
+      img.onload = () => {
+        this.drawChar(ele);
+      }
+    });
+
+    const cache = setInterval(() => {
+      this.cacheComment = [
+        ...this.cacheComment,
+        ...this.random()
+      ];
+      this.count += 1;
+    }, 1000)
+
+    const push = setInterval(() => {
+      let random = this.findArrayWithFewestElements(this.arr);
+      this.arr[random].data = [
+        ...this.arr[random].data,
+        ...this.cacheComment
+      ];
+      this.cacheComment = [];
+      this.drawChar(this.arr[random]);
+      if (this.count > 2000) {
+        clearInterval(cache);
+        clearInterval(push);
+        console.log(this.count);
+      }
+    }, 2000)
   }
 
   generateRandomText() {
-    const characters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ '; // Bao gồm cả ký tự và dấu cách
-    const textLength = Math.floor(Math.random() * (50 + 1)); // Độ dài ngẫu nhiên
+    const characters = 'abcd ef ghi jk lmnop qrst uvwxy zABCDEF GHIJK LMN OPQ RSTUV WXYZ '; // Bao gồm cả ký tự và dấu cách
+    const textLength = Math.floor(Math.random() * (50 - 4 + 1)) + 4; // Độ dài ngẫu nhiên
 
     let randomText = '';
     for (let i = 0; i < textLength; i++) {
@@ -199,70 +107,131 @@ export class AppComponent implements OnInit, AfterViewInit {
     return randomText;
   }
 
-  randomPositionText() {
-    return Math.floor(Math.random() * 4) + 1
+  getUrlImg(text: string) {
+    return `./assets/${text}.svg`;
   }
 
-  generateHTML(char: string, data: any) {
-    const div = this.renderer.createElement('div');
-    this.renderer.addClass(div, char);
-    data.forEach((part: any) => {
-      const divPart = this.renderer.createElement('div');
-      this.renderer.addClass(divPart, part.name);
-      this.renderer.appendChild(div, divPart);
-      part.space.forEach((space: string) => {
-        const spaceView = this.renderer.createElement('div');
-        this.renderer.addClass(spaceView, space);
-        this.renderer.appendChild(divPart, spaceView);
-      });
-      const divText = this.renderer.createElement('div');
-      divText.style.lineHeight = '100%';
-      divText.style.fontSize = '20px';
-
-      part.text.forEach((text: string) => {
-        const p = this.renderer.createElement('p');
-        const comment = this.renderer.createText(text + ' ');
-        this.renderer.appendChild(p, comment);
-        this.renderer.appendChild(divText, p);
-      });
-      this.renderer.appendChild(divPart, divText);
-      part.element = divText;
-    });
-    this.renderer.appendChild(this.main.nativeElement, div);
+  getRandomInt(min: number, max: number) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
   }
 
-  generateViewChar(char: string, data: any) {
-    switch (char) {
-      case 'w':
+  drawChar(char: any) {
+    const canvas = document.getElementById(char.id)! as HTMLCanvasElement;
+    canvas.getContext('2d', { willReadFrequently: true })!.clearRect(0, 0, canvas.width, canvas.height);
+    var img = char.img;
+    var maskCanvas: any = null
+    maskCanvas = document.createElement('canvas');
+    maskCanvas.width = img.width;
+    maskCanvas.height = img.height;
 
-        break;
-      case 'h':
+    var ctx = maskCanvas.getContext('2d', { willReadFrequently: true });
+    ctx.drawImage(img, 0, 0, img.width, img.height);
 
-        break;
+    var imageData = ctx.getImageData(
+      0, 0, maskCanvas.width, maskCanvas.height);
+    var newImageData = ctx.createImageData(imageData);
 
-      case 'y':
+    for (var i = 0; i < imageData.data.length; i += 4) {
+      var tone = imageData.data[i] +
+        imageData.data[i + 1] +
+        imageData.data[i + 2];
+      var alpha = imageData.data[i + 3];
 
-        break;
-
-      case 'n':
-
-        break;
-
-      case 'o':
-
-        break;
-
-      case 't':
-
-        break;
-
-      default:
-        break;
+      if (alpha < 128 || tone > 128 * 3) {
+        // Area not to draw
+        newImageData.data[i] =
+          newImageData.data[i + 1] =
+          newImageData.data[i + 2] = 255;
+        newImageData.data[i + 3] = 0;
+      } else {
+        // Area to draw
+        newImageData.data[i] =
+          newImageData.data[i + 1] =
+          newImageData.data[i + 2] = 0;
+        newImageData.data[i + 3] = 255;
+      }
     }
+
+    ctx.putImageData(newImageData, 0, 0);
+    this.drawCanvas(maskCanvas, canvas, char.data)
   }
 
-  generateViewSpace(arr: Array<string>) {
+  drawCanvas(maskCanvas: any, canvas: any, data: any) {
+    var bctx = document.createElement('canvas').getContext('2d', { willReadFrequently: true })!;
+    bctx.fillStyle = '#fff';
+    bctx.fillRect(0, 0, 1, 1);
+    var bgPixel = bctx.getImageData(0, 0, 1, 1).data;
 
+    var maskCanvasScaled: any =
+      document.createElement('canvas');
+    maskCanvasScaled.width = canvas.width;
+    maskCanvasScaled.height = canvas.height;
+    var ctx: any = maskCanvasScaled.getContext('2d', { willReadFrequently: true })!;
+
+    ctx.drawImage(maskCanvas,
+      0, 0, maskCanvas.width, maskCanvas.height,
+      0, 0, maskCanvasScaled.width, maskCanvasScaled.height);
+
+    var imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    var newImageData = ctx.createImageData(imageData);
+    for (var i = 0; i < imageData.data.length; i += 4) {
+      if (imageData.data[i + 3] > 128) {
+        newImageData.data[i] = bgPixel[0];
+        newImageData.data[i + 1] = bgPixel[1];
+        newImageData.data[i + 2] = bgPixel[2];
+        newImageData.data[i + 3] = bgPixel[3];
+      } else {
+        // This color must not be the same w/ the bgPixel.
+        newImageData.data[i] = bgPixel[0];
+        newImageData.data[i + 1] = bgPixel[1];
+        newImageData.data[i + 2] = bgPixel[2];
+        newImageData.data[i + 3] = bgPixel[3] ? (bgPixel[3] - 1) : 0;
+      }
+    }
+
+    ctx.putImageData(newImageData, 0, 0);
+    ctx = canvas.getContext('2d', { willReadFrequently: true });
+    ctx.drawImage(maskCanvasScaled, 0, 0);
+
+    maskCanvasScaled = ctx = imageData = newImageData = undefined;
+    const wordFrequency: any = data;
+
+    // Initialize the word cloud options
+    const wordCloudOptions = {
+      list: wordFrequency,
+      fontFamily: 'Arial, sans-serif',
+      color: 'black',
+      clearCanvas: false,
+      weightFactor: function (size: any) {
+        return Math.pow(size, 2.3) * canvas.width / 1920
+      },
+      gridSize: Math.round(16 * canvas.width / 1920),
+      rotateRatio: 0,
+      shrinkToFit: true,
+      fontWeight: 700,
+      minSize: 1
+    };
+    WordCloud(canvas, wordCloudOptions);
+  }
+
+  findArrayWithFewestElements(arrays: any) {
+    var minIndex = 0;
+    var minCount = arrays[0].data.length;
+
+    for (var i = 1; i < arrays.length; i++) {
+      if (arrays[i].data.length < minCount) {
+        minIndex = i;
+        minCount = arrays[i].data.length;
+      }
+    }
+
+    return minIndex;
+  }
+
+  random() {
+    return new Array(this.getRandomInt(10, 50)).fill(1).map(() => {
+      return [this.generateRandomText(), 12]
+    })
   }
 
 }
