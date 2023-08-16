@@ -48,6 +48,8 @@ export class AppComponent implements OnInit, AfterViewInit {
   cacheComment: any = [];
   init: any = [];
   count = 0;
+
+
   constructor(
     private renderer: Renderer2
   ) { }
@@ -73,6 +75,7 @@ export class AppComponent implements OnInit, AfterViewInit {
 
             img.src = this.getUrlImg(ele.id);
             ele.img = img;
+            ele.data = ele.data.reverse();
             img.onload = () => {
               this.drawChar(ele);
             }
@@ -102,7 +105,7 @@ export class AppComponent implements OnInit, AfterViewInit {
               this.cacheComment = [];
               this.drawChar(this.arr[random]);
             }
-          })
+          });
           this.isFirst = false;
         }
       } else {
@@ -240,7 +243,7 @@ export class AppComponent implements OnInit, AfterViewInit {
       gridSize: Math.round(16 * canvas.width / 1920),
       rotateRatio: 0,
       shrinkToFit: true,
-      fontWeight: 700,
+      fontWeight: 900,
       minSize: 1
     };
     WordCloud(canvas, wordCloudOptions);
