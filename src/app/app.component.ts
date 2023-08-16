@@ -116,7 +116,7 @@ export class AppComponent implements OnInit, AfterViewInit {
 
   connect() {
     return webSocket({
-      url: 'ws://150.95.112.76:8088/socket/join?token=0818813399',
+      url: 'wss://api.thoikhacgiaothoi.com/socket/join?token=0818813399',
       deserializer: (msgEvent) => {
         const msg: string = msgEvent.data;
         const splitIndex = msg.indexOf(' ');
