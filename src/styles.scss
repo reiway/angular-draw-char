@@ -1,4 +1,5 @@
 /* You can add global styles to this file, and also import other style files */
+
 body,
 html {
     margin: 0px;
@@ -44,7 +45,7 @@ html {
     .row {
         width: 98%;
         margin: auto;
-        height: 30%;
+        height: 250px;
         display: grid;
         grid-template-columns: calc(17% - 2.5px) calc(13% - 2.5px) calc(13% - 2.5px) 3% calc(14% - 2.5px) calc(16% - 2.5px) calc(12% - 2.5px) calc(12% - 2.5px);
         gap: 2.5px;

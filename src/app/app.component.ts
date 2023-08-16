@@ -1,7 +1,8 @@
 import { AfterViewInit, Component, ElementRef, OnInit, Renderer2, ViewChild } from '@angular/core';
-import { timer } from 'rxjs';
 import WordCloud from 'wordcloud';
-
+import { WebSocketSubject, webSocket } from 'rxjs/webSocket';
+import { retry } from 'rxjs/internal/operators/retry';
+import { pipe, timer } from 'rxjs';
 
 @Component({
   selector: 'app-root',
@@ -10,7 +11,6 @@ import WordCloud from 'wordcloud';
 })
 export class AppComponent implements OnInit, AfterViewInit {
   @ViewChild('main') main!: ElementRef
-
   arrComment: Array<string> = [];
   layout: any;
   arr: any = [
@@ -51,7 +51,18 @@ export class AppComponent implements OnInit, AfterViewInit {
   ) { }
 
   ngOnInit(): void {
+    this.connect().pipe(retry(1000)).subscribe((msg: any) => {
+      if (msg.patten === '/init') {
+        this.cacheComment = msg.data.map((ele: any) => {
+          return [ele, 12];
+        });
 
+      } else {
+        this.cacheComment.push([msg.data.answers[0], 12])
+      }
+
+      // this.cacheComment.push([msg.answers[0], 12])
+    });
   }
 
   ngAfterViewInit(): void {
@@ -70,33 +81,54 @@ export class AppComponent implements OnInit, AfterViewInit {
       }
     });
 
-    const cache = setInterval(() => {
-      this.cacheComment = [
-        ...this.cacheComment,
-        ...this.random()
-      ];
-      this.count += 1;
-    }, 1000)
+    // const cache = timer(500, 500).subscribe(() => {
+    //   const a = this.random()
+    //   this.cacheComment = [
+    //     ...this.cacheComment,
+    //     ...a
+    //   ];
+    //   this.count += a.length;
+    // })
 
-    const push = setInterval(() => {
+    const push = timer(1000, 1000).subscribe(() => {
       let random = this.findArrayWithFewestElements(this.arr);
+      const len = this.arr[random].length;
+      const data = this.arr[random].data.map((ele: any) => {
+        return [ele[0], ele[1]]
+      });
       this.arr[random].data = [
-        ...this.arr[random].data,
+        ...data,
         ...this.cacheComment
       ];
       this.cacheComment = [];
       this.drawChar(this.arr[random]);
-      if (this.count > 2000) {
-        clearInterval(cache);
-        clearInterval(push);
-        console.log(this.count);
-      }
-    }, 2000)
+      // if (this.count > 500) {
+      //   cache.unsubscribe();
+      //   push.unsubscribe();
+      //   console.log(this.count);
+      //   console.log(this.arr);
+      // }
+    })
+  }
+
+  connect() {
+    return webSocket({
+      url: 'ws://150.95.112.76:8088/socket/join?token=0818813399',
+      deserializer: (msgEvent) => {
+        const msg: string = msgEvent.data;
+        const splitIndex = msg.indexOf(' ');
+        const patten = msg.slice(0, splitIndex);
+        const data = msg.slice(splitIndex, msg.length);
+        return {
+          patten, data: JSON.parse(data)
+        }
+      },
+    });
   }
 
   generateRandomText() {
     const characters = 'abcd ef ghi jk lmnop qrst uvwxy zABCDEF GHIJK LMN OPQ RSTUV WXYZ '; // Bao gồm cả ký tự và dấu cách
-    const textLength = Math.floor(Math.random() * (50 - 4 + 1)) + 4; // Độ dài ngẫu nhiên
+    const textLength = Math.floor(Math.random() * (10 - 4 + 1)) + 4; // Độ dài ngẫu nhiên
 
     let randomText = '';
     for (let i = 0; i < textLength; i++) {
@@ -153,7 +185,7 @@ export class AppComponent implements OnInit, AfterViewInit {
     }
 
     ctx.putImageData(newImageData, 0, 0);
-    this.drawCanvas(maskCanvas, canvas, char.data)
+    this.drawCanvas(maskCanvas, canvas, (char.data as Array<any>).reverse())
   }
 
   drawCanvas(maskCanvas: any, canvas: any, data: any) {
@@ -199,7 +231,7 @@ export class AppComponent implements OnInit, AfterViewInit {
     // Initialize the word cloud options
     const wordCloudOptions = {
       list: wordFrequency,
-      fontFamily: 'Arial, sans-serif',
+      fontFamily: "proxima-nova, sans-serif",
       color: 'black',
       clearCanvas: false,
       weightFactor: function (size: any) {
@@ -229,9 +261,10 @@ export class AppComponent implements OnInit, AfterViewInit {
   }
 
   random() {
-    return new Array(this.getRandomInt(10, 50)).fill(1).map(() => {
+    return new Array(this.getRandomInt(10, 20)).fill(1).map(() => {
       return [this.generateRandomText(), 12]
     })
+
   }
 
 }
