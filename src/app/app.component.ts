@@ -44,6 +44,7 @@ export class AppComponent implements OnInit, AfterViewInit {
       img: null
     },
   ]
+  isFirst = true;
   cacheComment: any = [];
   count = 0;
   constructor(
@@ -53,10 +54,12 @@ export class AppComponent implements OnInit, AfterViewInit {
   ngOnInit(): void {
     this.connect().pipe(retry(1000)).subscribe((msg: any) => {
       if (msg.patten === '/init') {
-        this.cacheComment = msg.data.map((ele: any) => {
-          return [ele, 12];
-        });
-
+        if (this.isFirst) {
+          this.cacheComment = msg.data.map((ele: any) => {
+            return [ele, 12];
+          });
+          this.isFirst = false;
+        }
       } else {
         this.cacheComment.push([msg.data.answers[0], 12])
       }
