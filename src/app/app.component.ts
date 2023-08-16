@@ -46,72 +46,69 @@ export class AppComponent implements OnInit, AfterViewInit {
   ]
   isFirst = true;
   cacheComment: any = [];
+  init: any = [];
   count = 0;
   constructor(
     private renderer: Renderer2
   ) { }
 
   ngOnInit(): void {
+
+  }
+
+  ngAfterViewInit(): void {
     this.connect().pipe(retry(1000)).subscribe((msg: any) => {
       if (msg.patten === '/init') {
         if (this.isFirst) {
-          this.cacheComment = msg.data.map((ele: any) => {
-            return [ele, 12];
+          console.log(this.splitArrayIntoEqualChunks(msg.data, 7));
+
+          this.splitArrayIntoEqualChunks(msg.data, 7).forEach((item: any, index: any) => {
+            this.arr[index].data = item.map((ele: any) => {
+              return [ele, 12]
+            });
           });
+          this.arr.forEach((ele: any) => {
+            var img = new Image();
+            console.log({ ...ele });
+
+            img.src = this.getUrlImg(ele.id);
+            ele.img = img;
+            img.onload = () => {
+              this.drawChar(ele);
+            }
+          });
+
+          // const cache = timer(500, 500).subscribe(() => {
+          //   const a = this.random()
+          //   this.cacheComment = [
+          //     ...this.cacheComment,
+          //     ...a
+          //   ];
+          //   this.count += a.length;
+          // })
+
+          timer(1000, 1000).subscribe(() => {
+            if (this.cacheComment.length) {
+              let random = this.findArrayWithFewestElements(this.arr);
+
+              const len = this.arr[random].length;
+              const data = this.arr[random].data.map((ele: any) => {
+                return [ele[0], ele[1]]
+              });
+              this.arr[random].data = [
+                ...data,
+                ...this.cacheComment
+              ];
+              this.cacheComment = [];
+              this.drawChar(this.arr[random]);
+            }
+          })
           this.isFirst = false;
         }
       } else {
         this.cacheComment.push([msg.data.answers[0], 12])
       }
-
-      // this.cacheComment.push([msg.answers[0], 12])
     });
-  }
-
-  ngAfterViewInit(): void {
-    this.arr = this.arr.map((ele: any) => {
-      return {
-        ...ele,
-        data: []
-      }
-    });
-    this.arr.forEach((ele: any) => {
-      var img = new Image();
-      img.src = this.getUrlImg(ele.id);
-      ele.img = img;
-      img.onload = () => {
-        this.drawChar(ele);
-      }
-    });
-
-    // const cache = timer(500, 500).subscribe(() => {
-    //   const a = this.random()
-    //   this.cacheComment = [
-    //     ...this.cacheComment,
-    //     ...a
-    //   ];
-    //   this.count += a.length;
-    // })
-
-    const push = timer(1000, 1000).subscribe(() => {
-      let random = this.findArrayWithFewestElements(this.arr);
-      const len = this.arr[random].length;
-      const data = this.arr[random].data.map((ele: any) => {
-        return [ele[0], ele[1]]
-      });
-      this.arr[random].data = [
-        ...data,
-        ...this.cacheComment
-      ];
-      this.cacheComment = [];
-      this.drawChar(this.arr[random]);
-      // if (this.count > 500) {
-      //   cache.unsubscribe();
-      //   push.unsubscribe();
-      //   console.log(this.count);
-      //   console.log(this.arr);
-      // }
-    })
   }
 
   connect() {
@@ -247,6 +244,17 @@ export class AppComponent implements OnInit, AfterViewInit {
       minSize: 1
     };
     WordCloud(canvas, wordCloudOptions);
+  }
+
+  splitArrayIntoEqualChunks(arr: any, numChunks: any) {
+    const chunkSize = Math.ceil(arr.length / numChunks);
+    const chunks = [];
+
+    for (let i = 0; i < arr.length; i += chunkSize) {
+      chunks.push(arr.slice(i, i + chunkSize));
+    }
+
+    return chunks;
   }
 
   findArrayWithFewestElements(arrays: any) {
