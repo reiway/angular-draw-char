@@ -75,7 +75,6 @@ export class AppComponent implements OnInit, AfterViewInit {
 
             img.src = this.getUrlImg(ele.id);
             ele.img = img;
-            ele.data = ele.data.reverse();
             img.onload = () => {
               this.drawChar(ele);
             }
