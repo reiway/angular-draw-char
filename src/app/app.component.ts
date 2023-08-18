@@ -38,11 +38,7 @@ export class AppComponent implements OnInit, AfterViewInit {
       id: 't',
       data: [],
       img: null
-    }, {
-      id: 'qm',
-      data: [],
-      img: null
-    },
+    }
   ]
   isFirst = true;
   cacheComment: any = [];
@@ -62,9 +58,9 @@ export class AppComponent implements OnInit, AfterViewInit {
     this.connect().pipe(retry(1000)).subscribe((msg: any) => {
       if (msg.patten === '/init') {
         if (this.isFirst) {
-          console.log(this.splitArrayIntoEqualChunks(msg.data, 7));
+          console.log(this.splitArrayIntoEqualChunks(msg.data, 6));
 
-          this.splitArrayIntoEqualChunks(msg.data, 7).forEach((item: any, index: any) => {
+          this.splitArrayIntoEqualChunks(msg.data, 6).forEach((item: any, index: any) => {
             this.arr[index].data = item.map((ele: any) => {
               return [ele, 30]
             });
