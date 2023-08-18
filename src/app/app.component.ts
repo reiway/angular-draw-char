@@ -66,7 +66,7 @@ export class AppComponent implements OnInit, AfterViewInit {
 
           this.splitArrayIntoEqualChunks(msg.data, 7).forEach((item: any, index: any) => {
             this.arr[index].data = item.map((ele: any) => {
-              return [ele, 15]
+              return [ele, 30]
             });
           });
           this.arr.forEach((ele: any) => {
@@ -108,7 +108,7 @@ export class AppComponent implements OnInit, AfterViewInit {
           this.isFirst = false;
         }
       } else {
-        this.cacheComment.push([msg.data.answers[0], 15])
+        this.cacheComment.push([msg.data.answers[0], 30])
       }
     });
   }
@@ -233,18 +233,15 @@ export class AppComponent implements OnInit, AfterViewInit {
     // Initialize the word cloud options
     const wordCloudOptions = {
       list: wordFrequency,
-      fontFamily: "proxima-nova, sans-serif",
+      fontFamily: "'Inter', sans-serif",
       color: 'black',
       clearCanvas: false,
-      weightFactor: function (size: any) {
-        return Math.pow(size, 2.3) * canvas.width / 1920
-      },
       gridSize: Math.round(16 * canvas.width / 1920),
       rotateRatio: 0,
       shrinkToFit: true,
-      fontWeight: 700,
+      fontWeight: 900,
       minSize: 1,
-      backgroundColor: '#FBFCF4'
+      backgroundColor: '#FBFCF4',
     };
     WordCloud(canvas, wordCloudOptions);
   }
