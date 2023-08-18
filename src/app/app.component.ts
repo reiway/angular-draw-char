@@ -192,7 +192,7 @@ export class AppComponent implements OnInit, AfterViewInit {
 
   drawCanvas(maskCanvas: any, canvas: any, data: any) {
     var bctx = document.createElement('canvas').getContext('2d', { willReadFrequently: true })!;
-    bctx.fillStyle = '#fff';
+    bctx.fillStyle = '#FBFCF4';
     bctx.fillRect(0, 0, 1, 1);
     var bgPixel = bctx.getImageData(0, 0, 1, 1).data;
 
