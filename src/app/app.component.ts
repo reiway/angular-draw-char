@@ -242,8 +242,9 @@ export class AppComponent implements OnInit, AfterViewInit {
       gridSize: Math.round(16 * canvas.width / 1920),
       rotateRatio: 0,
       shrinkToFit: true,
-      fontWeight: 900,
-      minSize: 1
+      fontWeight: 700,
+      minSize: 1,
+      backgroundColor: '#FBFCF4'
     };
     WordCloud(canvas, wordCloudOptions);
   }

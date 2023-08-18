@@ -8,6 +8,15 @@ html {
     background: #FBFCF4;
 }
 
+@font-face {
+    font-family: 'bold';
+    src: url('./assets/VL_Mark\ Simonson\ -\ Proxima\ Nova\ Bold.otf');
+}
+
+@font-face {
+    font-family: 'thin';
+    src: url('./assets/VL_Mark\ Simonson\ -\ Proxima\ Nova\ Thin.otf');
+}
 
 .main {
     width: 100%;
@@ -39,7 +48,7 @@ html {
         font-weight: 900;
 
         p {
-            font-family: 'Proxima Nova', sans-serif;
+            font-family: 'thin';
             margin-bottom: 12px;
         }
 
