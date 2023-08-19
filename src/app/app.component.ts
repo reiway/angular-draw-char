@@ -44,6 +44,8 @@ export class AppComponent implements OnInit, AfterViewInit {
   cacheComment: any = [];
   init: any = [];
   count = 0;
+  video = true;
+  sub: any = null;
 
 
   constructor(
@@ -88,7 +90,9 @@ export class AppComponent implements OnInit, AfterViewInit {
           timer(1000, 1000).subscribe(() => {
             if (this.cacheComment.length) {
               let random = this.findArrayWithFewestElements(this.arr);
-
+              if (this.sub) {
+                this.sub.unsubscribe();
+              }
               const len = this.arr[random].length;
               const data = this.arr[random].data.map((ele: any) => {
                 return [ele[0], ele[1]]
@@ -97,11 +101,26 @@ export class AppComponent implements OnInit, AfterViewInit {
                 ...data,
                 ...this.cacheComment
               ];
+              const video = document.getElementById('video') as HTMLVideoElement;
+              video.style.display = 'none';
+              video.currentTime = 0;
+              video.pause();
               this.cacheComment = [];
               this.drawChar(this.arr[random]);
+              this.sub = timer(10000, 10000).subscribe(() => {
+                const video = document.getElementById('video') as HTMLVideoElement;
+                video.style.display = 'block';
+                video.play();
+              })
             }
           });
+
           this.isFirst = false;
+          this.sub = timer(10000, 10000).subscribe(() => {
+            const video = document.getElementById('video') as HTMLVideoElement;
+            video.style.display = 'block';
+            video.play();
+          })
         }
       } else {
         this.cacheComment.push([msg.data.answers[0], 30])
@@ -238,6 +257,7 @@ export class AppComponent implements OnInit, AfterViewInit {
       fontWeight: 900,
       minSize: 3,
       backgroundColor: '#FBFCF4',
+      wait: 50
     };
     WordCloud(canvas, wordCloudOptions);
   }
