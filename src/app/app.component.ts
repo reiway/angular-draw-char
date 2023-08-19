@@ -107,7 +107,7 @@ export class AppComponent implements OnInit, AfterViewInit {
               video.pause();
               this.cacheComment = [];
               this.drawChar(this.arr[random]);
-              this.sub = timer(10000, 10000).subscribe(() => {
+              this.sub = timer(30000, 30000).subscribe(() => {
                 const video = document.getElementById('video') as HTMLVideoElement;
                 video.style.display = 'block';
                 video.play();
@@ -116,7 +116,7 @@ export class AppComponent implements OnInit, AfterViewInit {
           });
 
           this.isFirst = false;
-          this.sub = timer(10000, 10000).subscribe(() => {
+          this.sub = timer(30000, 30000).subscribe(() => {
             const video = document.getElementById('video') as HTMLVideoElement;
             video.style.display = 'block';
             video.play();
