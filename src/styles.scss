@@ -63,7 +63,7 @@ html {
         margin: auto;
         height: 300px;
         display: grid;
-        grid-template-columns: calc(18% - 2.5px) calc(15% - 2.5px) calc(15% - 2.5px) 3% calc(17% - 2.5px) calc(16% - 2.5px) calc(16% - 2.5px);
+        grid-template-columns: calc(18% - 2.5px) calc(15% - 2.5px) calc(15% - 2.5px) 3% calc(17% - 2.5px) calc(17% - 2.5px) calc(15% - 2.5px);
         gap: 2.5px;
         grid-template-rows: 100%;
         overflow: hidden;

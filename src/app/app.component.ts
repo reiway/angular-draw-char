@@ -236,7 +236,7 @@ export class AppComponent implements OnInit, AfterViewInit {
       rotateRatio: 0,
       shrinkToFit: true,
       fontWeight: 900,
-      minSize: 1,
+      minSize: 3,
       backgroundColor: '#FBFCF4',
     };
     WordCloud(canvas, wordCloudOptions);
